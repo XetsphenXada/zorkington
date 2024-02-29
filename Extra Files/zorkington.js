@@ -25,7 +25,7 @@ class World {
         this.areas = areas;
         this.currentArea = this.areas[originPoint];
 
-        console.log(`\nHey! I'm currently stuck in this dataspace and need you to help me navigate my way out.\nYou can use these commands to help me through:\nMove - Tell me which area to head to next\nLook - I'll tell you what I see around the area\nGrab - I can pick up an object you specify\nDrop - I can drop something if you think we won't need it\nIf you mention inventory in anyway, I'll let you know what I'm currently carrying.\nAnd remember--how you type things in is important for how I'll understand it! I am just a program, after all.\nSo currently it looks like we're in area ${this.currentArea.name}.`);
+        console.log(`\nYou are currently in ${this.currentArea.name}.`);
     }
 };
 
@@ -40,6 +40,9 @@ class Controller {
             destination = "null";
         }
 
+        // console.log(`Destination: ${destination}`) // DEBUG
+        // console.log(`Contains Destination: ${dataspace.currentArea.linkedAreas.includes(destination) === false}`) // DEBUG
+
         if (dataspace.currentArea.linkedAreas.includes(destination)) {
             dataspace.currentArea = dataspace.areas[destination];
             console.log(`\nAlright! I just arrived at ${dataspace.areas[destination].name}.`);
@@ -53,11 +56,13 @@ class Controller {
             console.log(`\nI can't just to go from ${dataspace.currentArea.name} to ${dataspace.areas[destination].name}.`);
             inputOutput = "";
         }
-
         return inputOutput;
     }
 
     look(viewThing) {
+        // console.log(`\nareaView: ${areaView}`) // DEBUG
+        // console.log(`Equals Name: ${areaView === dataspace.currentArea.name}`) // DEBUG
+        // console.log(`Equals Area: ${areaView.toLowerCase() === "area"}\n`) // DEBUG
         if (viewThing === null || viewThing === undefined || !viewThing) {
             viewThing = "null";
         }
@@ -71,7 +76,6 @@ class Controller {
             console.log(`\nI don't see that... Where are you looking?`);
             inputOutput = "";
         }
-
         return inputOutput;
     }
 
@@ -81,27 +85,26 @@ class Controller {
         }
 
         let index = 0;
-        let acquiredItem
-
+        // console.log(`areaItem: ${areaItem}`) // DEBUG
         if (dataspace.currentArea.inventory.includes(areaItem)) {
             for (let item of dataspace.currentArea.inventory) {
+                // console.log(`Item: ${item}`) // DEBUG
+                // console.log(`Equal: ${item === areaItem}`) // DEBUG
                 if (item === areaItem) {
-                    if (index === 0) {
-                        acquiredItem = String(dataspace.currentArea.inventory.splice(index, index + 1));
-                    } else {
-                        acquiredItem = String(dataspace.currentArea.inventory.splice(index, index));
-                    }
+                    // console.log(`${dataspace.currentArea.name}'s Inventory: ${dataspace.currentArea.inventory}`) // DEBUG
+                    let acquiredItem = String(dataspace.currentArea.inventory.splice(index, index + 1));
+                    // console.log(`Remove's Value: ${remove}`)
+                    // console.log(`Player's Inventory: ${player.inventory}`) // DEBUG
                     this.inventory.push(acquiredItem);
                     console.log(`\nOkay, I grabbed the ${acquiredItem}!`);
+                    console.log(`${typeof acquiredItem}`)
                     visitAllRooms += 1; // DEBUG
                     inputOutput = "";
                     break
                 } else {
                     index += 1;
                 }
-
             }
-
             inputOutput = "";
         } else if (areaItem === "null") {
             inputOutput = "badGrab";
@@ -109,7 +112,7 @@ class Controller {
             console.log(`\nWhere do you see a ${areaItem} around here?`)
             inputOutput = "";
         }
-
+        // console.log(index) // DEBUG
         return inputOutput;
     }
 
@@ -119,26 +122,26 @@ class Controller {
         }
 
         let index = 0;
-        let droppedItem
-
+        // console.log(`inventoryItem: ${inventoryItem}`) // DEBUG
+        // console.log(`In Inventory: ${this.inventory.includes(inventoryItem)}`) // DEBUG
         if (this.inventory.includes(inventoryItem)) {
             for (let item of this.inventory) {
+                // console.log(`Item: ${item}`) // DEBUG
+                // console.log(`Equal: ${item === inventoryItem}`) // DEBUG
                 if (item === inventoryItem) {
-                    if (index === 0) {
-                        droppedItem = this.inventory.splice(index, index + 1);
-                    } else {
-                        droppedItem = this.inventory.splice(index, index);
-                    }
+                    // console.log(`${dataspace.currentArea.name}'s Inventory: ${dataspace.currentArea.inventory}`) // DEBUG
+                    let droppedItem = this.inventory.splice(index, index + 1);
+                    console.log(`droppedItem's Value: ${droppedItem}`)
+                    // console.log(`${dataspace.currentArea.name}'s Inventory: ${dataspace.currentArea.inventory}`) // DEBUG
                     dataspace.currentArea.inventory.push(droppedItem);
                     console.log(`\nDropping the ${droppedItem}!`);
                     visitAllRooms -= 1; // DEBUG
                     inputOutput = "";
                     break
                 } else {
-                    index += 1;
+                    index -= 1;
                 }
             }
-
             inputOutput = "";
         } else if (inventoryItem === "null") {
             inputOutput = "badGrab";
@@ -146,7 +149,7 @@ class Controller {
             console.log(`\nI'm not holding on to a ${inventoryItem}.`)
             inputOutput = "";
         }
-
+        // console.log(index) // DEBUG
         return inputOutput;
     }
 
@@ -156,7 +159,6 @@ class Controller {
         } else {
             console.log(`\nI'm not holding on to anything right now!`)
         }
-
         inputOutput = "";
         return inputOutput;
     }
@@ -166,10 +168,10 @@ class Controller {
 /* -----    DECLERATIONS   ----- */
 
 let dataspace = new World({
-    A1: new Location(`A1`, [`A2`, `B1`], ["keyFrag"]),
-    A2: new Location(`A2`, [`A1`, `B2`], ["keyFrag", "bugData"]),
-    B1: new Location(`B1`, [`A1`, `B2`], ["keyFrag", "junkFile", "bugData"]),
-    B2: new Location(`B2`, [`A2`, `B1`], ["keyFrag", "bugData"])
+    A1: new Location(`A1`, [`A2`, `B1`], ["key"]),
+    A2: new Location(`A2`, [`A1`, `B2`], ["key"]),
+    B1: new Location(`B1`, [`A1`, `B2`], ["key"]),
+    B2: new Location(`B2`, [`A2`, `B1`], ["key"])
 }, `A1`);
 
 let player = new Controller(["move", "look", "grab", "drop", "inventory"]);
@@ -189,11 +191,16 @@ function ask(questionText) {
 }
 
 function checkInput(inputEntered) {
+    // console.log(`inputEntered: ${inputEntered}`) // DEBUG
     let inputSplit = inputEntered.split(" ");
-
+    // console.log(`inputSplit: ${inputSplit}`) // DEBUG
+    // console.log(`Player Inventory: ${player.inventory}, \n${player.inventory[0]}, \n${typeof player.inventory}`) // DEBUG
     for (word of inputSplit) {
+        // console.log(`\nWord: ${word}`) // DEBUG
+        // console.log(`In Inventory: ${player.inventory.includes(word)}`) // DEBUG
         if (player.commands.includes(word.toLowerCase())) {
             storedCommand = word.toLowerCase();
+            // console.log(`storedCommand: ${storedCommand}`) // DEBUG
         } else if (dataspace.currentArea.inventory.includes(word)) {
             storedObject = word;
             console.log
@@ -206,11 +213,35 @@ function checkInput(inputEntered) {
                 }
             }
         }
+        console.log(`storedObject: ${storedObject}`) // DEBUG
+
+        // console.log(`In Linked Areas: ${dataspace.currentArea.linkedAreas.includes(word)}`) // DEBUG
+        // if (dataspace.currentArea.linkedAreas.includes(word)) {
+        //     storedObject = word;
+        //     console.log(`storedObject: ${storedObject}`) // DEBUG
+        // }
+
+        // if (word.toLowerCase() === "inventory") {
+        //     storedObject = "inventory";
+        // }
+        // console.log(`storedObject: ${storedObject}\n`) // DEBUG
     }
 
+    // if (storedObject === "inventory") {
+    //     noneNull = false;
+    // } else if (storedCommand === null) {
+    //     noneNull = false;
+    // } else if (storedObject === null) {
+    //     noneNull = false;
+    // }
+
+    // console.log(`storedCommand: ${storedCommand}`) // DEBUG
+    // console.log(`storedObject: ${storedObject}\n`) // DEBUG
         if (storedObject === null) {
             storedObject = "null";
         }
+
+    // console.log(`stored Object Equals Inventory: ${storedObject === "inventory"}`) // DEBUG
 
         if (storedCommand === "move") {
             player.move(storedObject);
@@ -257,24 +288,33 @@ function showDescription(view) {
 
     counter = 0;
 
+    // console.log(`${dataspace.currentArea.name}'s Inventory: ${dataspace.currentArea.inventory}`) // DEBUG
     if (dataspace.currentArea.inventory.length !== 0) {
         descriptionResponse += ` I also see `
         for (item of dataspace.currentArea.inventory) {
+            // console.log(`Item: ${item}`) // DEBUG
             indexInventory += 1;
+            // console.log(`Index: ${indexInventory}`) // DEBUG
         }
 
         descriptionResponse += `a ${dataspace.currentArea.inventory[counter]}`;
         counter += 1;
 
+        // console.log(`\nIndex Greater Than 0: ${indexInventory > 0}`) // DEBUG
         if (indexInventory > 0) {
+            // console.log(`\nCounter: ${counter}`) // DEBUG
+            // console.log(`Index: ${indexInventory}`) // DEBUG
+            // console.log(`Counter Less Than Index: ${counter < indexInventory}`) // DEBUG
             if (counter < indexInventory) {
                 do {
                     descriptionResponse += `, a ${dataspace.currentArea.inventory[counter]}`
                     counter += 1;
+                    // console.log(`\nCounter: ${counter}`) // DEBUG
+                    // console.log(`Index: ${indexInventory}`) // DEBUG
+                    // console.log(`Less Than Index: ${counter < indexInventory}`) // DEBUG
                 } while (counter < indexInventory);
             }
-            
-            descriptionResponse += ` and a ${dataspace.currentArea.inventory[counter]}.`;
+                descriptionResponse += ` and a ${dataspace.currentArea.inventory[counter]}.`;
         } else {
             descriptionResponse += `.`
         }
@@ -313,7 +353,7 @@ async function run() {
         inputOutput = ""
     } while (visitAllRooms < 4)
 
-    console.log(`\nWoah! It looks like the keyFrags are responding!\nI see... It make some kind of keyData! I'm gonna use that to exit! Thanks for all your help!\n`)
+    console.log("\nI got all of the keys! I'm logging out!\n")
 
     process.exit();
 }
