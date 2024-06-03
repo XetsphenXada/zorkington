@@ -1,10 +1,10 @@
-const { rejects } = require('assert');
-const { AsyncLocalStorage } = require('async_hooks');
-const { count } = require('console');
-const { resolve } = require('path');
-const { constrainedMemory } = require('process');
+// const { rejects } = require('assert');
+// const { AsyncLocalStorage } = require('async_hooks');
+// const { count } = require('console');
+// const { resolve } = require('path');
+// const { constrainedMemory } = require('process');
 const readline = require('readline');
-const { workerData } = require('worker_threads');
+// const { workerData } = require('worker_threads');
 const rl = readline.createInterface(
     process.stdin,
     process.stdout
@@ -35,6 +35,7 @@ class Controller {
         this.inventory = [];
     }
 
+    /* Moves character through world to specified area */
     move(destination) {
         if (destination === null || destination === undefined || !destination) {
             destination = "null";
@@ -57,6 +58,7 @@ class Controller {
         return inputOutput;
     }
 
+    /* Gives description area and objects within */
     look(viewThing) {
         if (viewThing === null || viewThing === undefined || !viewThing) {
             viewThing = "null";
@@ -75,6 +77,7 @@ class Controller {
         return inputOutput;
     }
 
+    /* Adds specified item to inventory and removes from room */
     grab(areaItem) {
         if (areaItem === null || areaItem === undefined || !areaItem) {
             areaItem = "null";
@@ -113,6 +116,7 @@ class Controller {
         return inputOutput;
     }
 
+    /* Removes specified item from inventory and adds to room */
     drop(inventoryItem) {
         if (inventoryItem === null || inventoryItem === undefined || !inventoryItem) {
             inventoryItem = "null";
@@ -150,6 +154,7 @@ class Controller {
         return inputOutput;
     }
 
+    /* Checks items in inventory */
     checkInventory() {
         if (this.inventory.length !== 0) {
             console.log(`\nOk. Here's what I have:\n${this.inventory}`);
@@ -165,6 +170,7 @@ class Controller {
 
 /* -----    DECLERATIONS   ----- */
 
+/* Create game world and locations within */
 let dataspace = new World({
     A1: new Location(`A1`, [`A2`, `B1`], ["keyFrag"]),
     A2: new Location(`A2`, [`A1`, `B2`], ["keyFrag", "bugData"]),
@@ -172,8 +178,10 @@ let dataspace = new World({
     B2: new Location(`B2`, [`A2`, `B1`], ["keyFrag", "bugData"])
 }, `A1`);
 
+/* Player Controller for naviating world */
 let player = new Controller(["move", "look", "grab", "drop", "inventory"]);
 
+/* Used variables */
 let inputOutput = "";
 let storedCommand = null;
 let storedObject = null;
@@ -182,15 +190,18 @@ let visitAllRooms = 0;
 
 /* -----    FUNCTIONS   ----- */
 
+/* Allows user to input commands */
 function ask(questionText) {
     return new Promise((resolve, reject) => {
         rl.question(questionText, resolve);
     });
 }
 
+/* Checks user input for legal commands */
 function checkInput(inputEntered) {
     let inputSplit = inputEntered.split(" ");
 
+    /* Searches user's input for keywords to determine which functions to execute */
     for (word of inputSplit) {
         if (player.commands.includes(word.toLowerCase())) {
             storedCommand = word.toLowerCase();
@@ -208,29 +219,32 @@ function checkInput(inputEntered) {
         }
     }
 
-        if (storedObject === null) {
-            storedObject = "null";
-        }
+    /* Null variable catch */
+    if (storedObject === null) {
+        storedObject = "null";
+    }
 
-        if (storedCommand === "move") {
-            player.move(storedObject);
-        } else if (storedCommand === "look") {
-            player.look(storedObject);
-        } else if (storedCommand === "grab") {
-            player.grab(storedObject);
-        } else if (storedCommand === "drop") {
-            player.drop(storedObject);
-        } else if (storedCommand === "inventory") {
-            player.checkInventory();
-        } else {
-            console.log(`\nI don't understand that command.`)
-        }
+    /* Checks for specific commands to be executed */
+    if (storedCommand === "move") {
+        player.move(storedObject);
+    } else if (storedCommand === "look") {
+        player.look(storedObject);
+    } else if (storedCommand === "grab") {
+        player.grab(storedObject);
+    } else if (storedCommand === "drop") {
+        player.drop(storedObject);
+    } else if (storedCommand === "inventory") {
+        player.checkInventory();
+    } else {
+        console.log(`\nI don't understand that command.`)
+    }
     
     storedCommand = null;
     storedObject = null;
     return inputOutput;
 }
 
+/* Shows area's description and items within if any */
 function showDescription(view) {
     let descriptionResponse = `\nI'm currently in ${view}. `
     let indexInventory = -1
@@ -241,6 +255,7 @@ function showDescription(view) {
         indexAreas += 1;
     }
 
+    /* Lists connected rooms */
     if (indexAreas > 0) {
         descriptionResponse += `The linked areas are ${dataspace.currentArea.linkedAreas[counter]}`
         counter += 1;
@@ -257,6 +272,7 @@ function showDescription(view) {
 
     counter = 0;
 
+    /* If room has items, also lists current inventory */
     if (dataspace.currentArea.inventory.length !== 0) {
         descriptionResponse += ` I also see `
         for (item of dataspace.currentArea.inventory) {
