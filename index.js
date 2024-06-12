@@ -41,12 +41,16 @@ class Controller {
             destination = "null";
         }
 
+        // good destination
         if (dataspace.currentArea.linkedAreas.includes(destination)) {
             dataspace.currentArea = dataspace.areas[destination];
             console.log(`\nAlright! I just arrived at ${dataspace.areas[destination].name}.`);
             inputOutput = "";
+        // null destination
         } else if (destination === "null") {
             inputOutput = "badMove";
+
+        // bad destination
         } else if (dataspace.currentArea.linkedAreas.includes(destination) === false) {
             console.log(`\nThere is no "${destination}"--give me a real location.`)
             inputOutput = "";
@@ -60,13 +64,17 @@ class Controller {
 
     /* Gives description area and objects within */
     look(viewThing) {
+        // null catch
         if (viewThing === null || viewThing === undefined || !viewThing) {
             viewThing = "null";
         }
 
+        // good look
         if (viewThing === dataspace.currentArea.name || viewThing.toLowerCase() === "area") {
             showDescription(dataspace.currentArea.name);
             inputOutput = "";
+
+        // null look
         } else if (viewThing === "null") {
             inputOutput = "badLook";
         } else {
@@ -79,21 +87,26 @@ class Controller {
 
     /* Adds specified item to inventory and removes from room */
     grab(areaItem) {
+        // null catch
         if (areaItem === null || areaItem === undefined || !areaItem) {
             areaItem = "null";
         }
 
+        // variable decleration
         let index = 0;
         let acquiredItem
 
+        // good grab
         if (dataspace.currentArea.inventory.includes(areaItem)) {
             for (let item of dataspace.currentArea.inventory) {
                 if (item === areaItem) {
+                    // remove item from area inventory
                     if (index === 0) {
                         acquiredItem = String(dataspace.currentArea.inventory.splice(index, index + 1));
                     } else {
                         acquiredItem = String(dataspace.currentArea.inventory.splice(index, index));
                     }
+                    // add item to player inventory
                     this.inventory.push(acquiredItem);
                     console.log(`\nOkay, I grabbed the ${acquiredItem}!`);
                     visitAllRooms += 1; // DEBUG
@@ -106,6 +119,8 @@ class Controller {
             }
 
             inputOutput = "";
+        
+        // null grab
         } else if (areaItem === "null") {
             inputOutput = "badGrab";
         } else {
@@ -118,21 +133,28 @@ class Controller {
 
     /* Removes specified item from inventory and adds to room */
     drop(inventoryItem) {
+        // null catch
         if (inventoryItem === null || inventoryItem === undefined || !inventoryItem) {
             inventoryItem = "null";
         }
 
+        // variable declerations
         let index = 0;
         let droppedItem
 
+        // good drop
         if (this.inventory.includes(inventoryItem)) {
             for (let item of this.inventory) {
                 if (item === inventoryItem) {
+
+                    // remove item from player inventory
                     if (index === 0) {
                         droppedItem = this.inventory.splice(index, index + 1);
                     } else {
                         droppedItem = this.inventory.splice(index, index);
                     }
+
+                    // add item to area inventory
                     dataspace.currentArea.inventory.push(droppedItem);
                     console.log(`\nDropping the ${droppedItem}!`);
                     visitAllRooms -= 1; // DEBUG
@@ -144,6 +166,8 @@ class Controller {
             }
 
             inputOutput = "";
+
+        // null drop
         } else if (inventoryItem === "null") {
             inputOutput = "badGrab";
         } else {
